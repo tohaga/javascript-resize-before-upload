@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Resize before upload</title>
+</head>
+
+<body>
+    <div>
+        <input type="file" id="image-input" accept="image/*">
+        <img id="preview"></img>
+        <canvas id="canvas" width="700"></canvas>
+    </div>
+
+    <script>
+        let imgInput = document.getElementById('image-input');
+        imgInput.addEventListener('change', function (e) {
+            if (e.target.files) {
+                let imageFile = e.target.files[0];
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var img = document.createElement("img");
+                    var maximum_taller = 400;
+                    img.onload = function (event) {
+                        const canvas = document.getElementById("canvas");
+                        const ctx = canvas.getContext("2d");
+
+                        var taller = 0;
+
+                        if (img.height == img.width) {
+                            taller = img.height;
+                        } else if (img.height < img.width) {
+                            taller = img.width;
+                        } else if (img.height > img.width) {
+                            taller = img.height;
+                        }
+
+                        if (taller > maximum_taller) {
+
+                            var divider = 2
+
+                            do {
+                                divider++;
+                            }
+                            while (taller / divider >= maximum_taller);
+
+                            divider--;
+
+                            canvas.height = img.height / divider;
+                            canvas.width = img.width / divider;
+
+                            const oc = document.createElement('canvas');
+                            const octx = oc.getContext('2d');
+
+                            oc.width = img.width;
+                            oc.height = img.height;
+
+                            octx.drawImage(img, 0, 0, oc.width, oc.height);
+
+                            ctx.drawImage(oc, 0, 0, oc.width, oc.height, 0, 0, canvas.width, canvas.height);
+
+
+                            var dataurl = canvas.toDataURL(imageFile.type);
+                            document.getElementById("preview").src = dataurl;
+
+                        }
+                    }
+                    img.src = e.target.result;
+                }
+                reader.readAsDataURL(imageFile);
+            }
+        });
+    </script>
+</body>
+
+</html>
